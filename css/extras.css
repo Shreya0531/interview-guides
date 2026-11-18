@@ -1,0 +1,88 @@
+/* Mock result box, cheat sheet, checklist, footer, back-to-top. */
+/* Mock interview result. */
+.mockbox {
+    text-align: center;
+    padding: 18px
+}
+
+.bigscore {
+    font: 700 56px var(--display);
+    color: var(--ac-i);
+    line-height: 1
+}
+
+.review {
+    text-align: left
+}
+
+/* Cheat sheet grid. */
+.cheat {
+    display: grid;
+    grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px
+}
+
+.cheat .card figure.code {
+    margin: 8px 0 0
+}
+
+.check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink)
+}
+
+.check input {
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--ac-i);
+    flex: none;
+    padding: 0
+}
+
+.check:hover {
+    background: var(--surface2)
+}
+
+/* Footer with the author card. */
+footer.site {
+    margin-top: 60px;
+    border-top: 1px solid var(--line);
+    padding-block: 30px 50px
+}
+
+footer.site .author {
+    display: inline-flex
+}
+
+footer.site p {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 12px 0 0
+}
+
+/* Back-to-top button. */
+.totop {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--c2i);
+    color: var(--on);
+    font-size: 18px;
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .5);
+    z-index: 40
+}

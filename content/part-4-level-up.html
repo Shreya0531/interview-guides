@@ -1,0 +1,300 @@
+<!-- ===================== PART 4 ===================== -->
+<section class="sec p4" id="specs" data-part="4" data-pname="Level Up" data-title="Reusing code with specs"
+         data-goal="Stop repeating yourself. Put shared settings in one place.">
+    <p class="lead">If 50 tests all repeat the same base URL, header and login, one change means 50 edits. A <b>specification</b>
+        (spec) holds the shared part once.</p>
+    <ul>
+        <li><b>RequestSpecification</b>: shared settings for the <i>request</i> (base URI, headers, auth, logging).</li>
+        <li><b>ResponseSpecification</b>: shared <i>checks</i> (status 200, JSON type, response time).</li>
+    </ul>
+    <div class="tabs">
+        <script type="text/x-code" data-lang="java" data-tab="Without specs">
+            // repeated in every test
+            given().baseUri("https://api.shop.com").header("Authorization", "Bearer " + token)
+                   .contentType(ContentType.JSON)
+            .when().get("/books")
+            .then().statusCode(200).contentType(ContentType.JSON).time(lessThan(3000L));
+
+            given().baseUri("https://api.shop.com").header("Authorization", "Bearer " + token)
+                   .contentType(ContentType.JSON)
+            .when().get("/books/2")
+            .then().statusCode(200).contentType(ContentType.JSON).time(lessThan(3000L));
+        </script>
+        <script type="text/x-code" data-lang="java" data-tab="With specs">
+            RequestSpecification reqSpec = new RequestSpecBuilder()
+                .setBaseUri("https://api.shop.com")
+                .addHeader("Authorization", "Bearer " + token)
+                .setContentType(ContentType.JSON)
+                .log(LogDetail.ALL)
+                .build();
+
+            ResponseSpecification okSpec = new ResponseSpecBuilder()
+                .expectStatusCode(200)
+                .expectContentType(ContentType.JSON)
+                .expectResponseTime(lessThan(3000L))
+                .build();
+
+            given().spec(reqSpec).when().get("/books").then().spec(okSpec);
+            given().spec(reqSpec).when().get("/books/2").then().spec(okSpec).body("id", equalTo(2));
+        </script>
+        <script type="text/x-code" data-lang="java" data-tab="Make it global">
+            @BeforeClass
+            public void setUp() {
+                // every given() now starts with these settings
+                RestAssured.requestSpecification = new RequestSpecBuilder()
+                    .setBaseUri("https://api.shop.com").build();
+                RestAssured.responseSpecification = new ResponseSpecBuilder()
+                    .expectResponseTime(lessThan(5000L)).build();
+            }
+            @AfterClass
+            public void cleanUp() { RestAssured.reset(); }   // clear all global settings
+        </script>
+    </div>
+    <div class="callout know"><b>Good to know</b>
+        <ul>
+            <li>You can add more to a spec per test: <code>given().spec(reqSpec).queryParam("page", 2)</code>.</li>
+            <li>Put your specs in one class (for example <code>Specs.java</code>) so the whole team shares them.</li>
+            <li>In parallel tests, avoid changing the <b>global</b> settings (they are shared). Pass a spec instead.
+            </li>
+        </ul>
+    </div>
+    <div class="callout int"><b>Interview question</b>
+        <p><i>"How do you avoid duplicate code in your API tests?"</i> Answer: request and response specs, a base test
+            class, POJOs for bodies, and small helper or service classes.</p></div>
+    <div class="practice" data-quiz="specs"></div>
+</section>
+
+<section class="sec p4" id="pojo" data-part="4" data-pname="Level Up" data-title="Java objects (POJO)"
+         data-goal="Send and read JSON using Java classes instead of long strings.">
+    <p class="lead">A <b>POJO</b> ("plain old Java object") is a simple class with fields, getters and setters. It
+        mirrors a JSON shape. REST Assured turns it into JSON and back for you.</p>
+    <ul>
+        <li><b>Serialization</b>: Java object → JSON (when you <i>send</i>).</li>
+        <li><b>Deserialization</b>: JSON → Java object (when you <i>read</i>).</li>
+    </ul>
+    <p>You need Jackson (or Gson) in your pom for this. Without it you get an error.</p>
+    <script type="text/x-code" data-lang="java" data-title="Book.java">
+        @JsonIgnoreProperties(ignoreUnknown = true)   // do not fail on extra JSON fields
+        public class Book {
+            private int id;
+            private String title;
+            private String author;
+            private int year;
+            private double price;
+
+            public Book() {}                           // Jackson needs an empty constructor
+            public Book(String title, String author, int year) {
+                this.title = title; this.author = author; this.year = year;
+            }
+            // getters and setters for every field (your IDE can generate them)
+            public String getTitle() { return title; }
+            public void setTitle(String title) { this.title = title; }
+            // ...
+        }
+    </script>
+    <h3>Send an object (serialize)</h3>
+    <script type="text/x-code" data-lang="java" data-title="POST with a POJO">
+        Book newBook = new Book("Clean Code", "Robert Martin", 2008);
+
+        given().contentType(ContentType.JSON)    // required, or REST Assured cannot pick a format
+               .body(newBook)                    // becomes JSON here
+        .when().post("/books")
+        .then().statusCode(201);
+    </script>
+    <h3>Read an object (deserialize)</h3>
+    <script type="text/x-code" data-lang="java" data-title="Response to POJO">
+        Book book = given().when().get("/books/2")
+            .then().statusCode(200)
+            .extract().as(Book.class);
+
+        Assert.assertEquals(book.getAuthor(), "Joshua Bloch");
+
+        // A list inside the JSON
+        List<Book> books = given().when().get("/books")
+            .jsonPath().getList("books", Book.class);
+
+        // A JSON that is a list at the top level
+        Book[] all = given().when().get("/books-array").as(Book[].class);
+    </script>
+    <h3>See the same body three ways</h3>
+    <div class="lab" data-lab="body"></div>
+    <div class="callout know"><b>When to use which</b>
+        <ul>
+            <li><b>String / text block</b>: quick demo or odd JSON.</li>
+            <li><b>Map</b>: small bodies, quick tests.</li>
+            <li><b>POJO</b>: real projects. Safer, reusable, and the compiler catches typos.</li>
+        </ul>
+        <p>Many teams also use <b>Lombok</b> (<code>@Data</code>, <code>@Builder</code>) to skip writing getters and
+            setters.</p></div>
+    <div class="practice" data-quiz="pojo"></div>
+</section>
+
+<section class="sec p4" id="schema" data-part="4" data-pname="Level Up" data-title="JSON schema validation"
+         data-goal="Check the shape of a whole response in one line.">
+    <p class="lead">A <b>JSON schema</b> is a file that describes the <i>shape</i> of a response: which fields must
+        exist and what type each one is. One line in your test checks all of it.</p>
+    <script type="text/x-code" data-lang="json" data-title="src/test/resources/book-schema.json">
+        {
+          "type": "object",
+          "required": ["id", "title", "price"],
+          "properties": {
+            "id":    { "type": "integer" },
+            "title": { "type": "string" },
+            "price": { "type": "number", "minimum": 0 },
+            "inStock": { "type": "boolean" }
+          }
+        }
+    </script>
+    <script type="text/x-code" data-lang="java" data-title="Use it">
+        import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+
+        given().when().get("/books/2")
+        .then().statusCode(200)
+        .body(matchesJsonSchemaInClasspath("book-schema.json"));
+    </script>
+    <div class="callout know"><b>Schema vs value checks</b>
+        <p>Schema checks <b>shape and types</b> ("price is a number"). It does not check <b>values</b> ("price is 45").
+            Use both: schema for structure, <code>body()</code> for important values.</p></div>
+    <h3>Try a validator</h3>
+    <p>Change the response and press Validate. Try removing <code>title</code>, or changing <code>price</code> to a
+        string.</p>
+    <div class="lab" data-lab="schema"></div>
+    <div class="callout tip"><b>Tip</b>
+        <p>No need to write a schema by hand. Paste a sample response into an online "JSON to schema" tool, then tighten
+            it. Add <code>"additionalProperties": false</code> if extra fields should fail the test.</p></div>
+    <div class="practice" data-quiz="schema"></div>
+</section>
+
+<section class="sec p4" id="xml" data-part="4" data-pname="Level Up" data-title="XML and XmlPath"
+         data-goal="Handle APIs that answer in XML. The ideas match JSON.">
+    <p class="lead">Some APIs still send XML. REST Assured reads it with the same <code>body()</code> style. The path
+        goes through tag names.</p>
+    <script type="text/x-code" data-lang="xml" data-title="Response">
+        <library>
+          <book id="1"><title>Clean Code</title><price>32.5</price></book>
+          <book id="2"><title>Effective Java</title><price>45</price></book>
+        </library>
+    </script>
+    <script type="text/x-code" data-lang="java" data-title="XML checks">
+        given().accept(ContentType.XML)
+        .when().get("/library")
+        .then().statusCode(200)
+            .body("library.book[0].title", equalTo("Clean Code"))   // by position
+            .body("library.book[1].@id", equalTo("2"))              // an attribute uses @
+            .body("library.book.title", hasItems("Clean Code", "Effective Java"))
+            .body("library.book.find { it.@id == '2' }.title", equalTo("Effective Java"));
+
+        // Read it yourself
+        XmlPath xml = new XmlPath(responseString);
+        String first = xml.getString("library.book[0].title");
+    </script>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Idea</th>
+                <th>JSON</th>
+                <th>XML</th>
+            </tr>
+            <tr>
+                <td>Inside</td>
+                <td><code>owner.city</code></td>
+                <td><code>library.book.title</code></td>
+            </tr>
+            <tr>
+                <td>Attribute</td>
+                <td>not applicable</td>
+                <td><code>book.@id</code></td>
+            </tr>
+            <tr>
+                <td>Parser class</td>
+                <td><code>JsonPath</code></td>
+                <td><code>XmlPath</code></td>
+            </tr>
+            <tr>
+                <td>Shape check</td>
+                <td>JSON schema</td>
+                <td>XSD: <code>matchesXsdInClasspath("lib.xsd")</code></td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout know"><b>Note</b>
+        <p>XML numbers come back as <b>text</b>. Compare with <code>"2"</code>, or convert first. REST Assured can send
+            SOAP messages as XML, but a SOAP-focused tool is usually a better fit.</p></div>
+    <div class="practice" data-quiz="xml"></div>
+</section>
+
+<section class="sec p4" id="logging" data-part="4" data-pname="Level Up" data-title="Logging and filters"
+         data-goal="See exactly what was sent and received when a test fails.">
+    <p class="lead">When a test fails, the first question is "what did we send and what came back?" Logging answers
+        it.</p>
+    <script type="text/x-code" data-lang="java" data-title="Log options">
+        given().log().all()               // print the whole request
+        .when().get("/books/2")
+        .then().log().all()               // print the whole response
+               .statusCode(200);
+
+        // Better habit: only print when something FAILS
+        given().log().ifValidationFails() ... .then().log().ifValidationFails() ...
+
+        // Switch it on for every test in one line
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    </script>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Call</th>
+                <th>Prints</th>
+            </tr>
+            <tr>
+                <td><code>log().all()</code></td>
+                <td>everything</td>
+            </tr>
+            <tr>
+                <td><code>log().body()</code></td>
+                <td>only the body</td>
+            </tr>
+            <tr>
+                <td><code>log().headers()</code></td>
+                <td>only headers</td>
+            </tr>
+            <tr>
+                <td><code>log().ifError()</code></td>
+                <td>only if the status is 4xx or 5xx</td>
+            </tr>
+            <tr>
+                <td><code>log().ifValidationFails()</code></td>
+                <td>only if a check fails</td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/x-code" data-lang="plain" data-title="Sample log">
+        Request method:   GET
+        Request URI:      https://api.shop.com/books/99
+        Headers:          Accept=*/*
+                          Authorization=Bearer tok_8f3a
+        HTTP/1.1 404 Not Found
+        Content-Type: application/json
+        { "error": "Book not found" }
+    </script>
+    <h3>Filters</h3>
+    <p>A <b>filter</b> sits between your test and the server and can look at or change every call. Teams use filters for
+        logging, reports and adding headers.</p>
+    <script type="text/x-code" data-lang="java" data-title="Filters">
+        given().filter(new RequestLoggingFilter())
+               .filter(new ResponseLoggingFilter())
+               .filter(new AllureRestAssured())        // adds each call to the Allure report
+
+        // Your own filter
+        Filter timer = (req, res, ctx) -> {
+            long t = System.currentTimeMillis();
+            Response r = ctx.next(req, res);           // send the request on
+            System.out.println(req.getURI() + " took " + (System.currentTimeMillis() - t) + " ms");
+            return r;
+        };
+
+        // Hide secrets in logs
+        RestAssured.config = RestAssured.config().logConfig(
+            LogConfig.logConfig().blacklistHeader("Authorization"));
+    </script>
+    <div class="practice" data-quiz="logging"></div>
+</section>

@@ -1,0 +1,478 @@
+<!-- ===================== PART 3 ===================== -->
+<section class="sec p3" id="requests" data-part="3" data-pname="Core Skills" data-title="Sending requests"
+         data-goal="Send GET, POST, PUT, PATCH and DELETE with parameters, headers and a body.">
+    <h3>Set the base URL once</h3>
+    <p>Put the part that never changes in one place, then use short paths in each call.</p>
+    <script type="text/x-code" data-lang="java" data-title="Base settings">
+        // Option 1: for one request
+        given().baseUri("https://api.shop.com").basePath("/v1")...
+
+        // Option 2: for ALL requests (put in @BeforeClass)
+        RestAssured.baseURI  = "https://api.shop.com";
+        RestAssured.basePath = "/v1";
+        RestAssured.port     = 443;       // only if not the default
+    </script>
+
+    <h3>GET with parameters</h3>
+    <script type="text/x-code" data-lang="java" data-title="Query and path parameters">
+        // Query param  ->  /books?author=Joshua%20Bloch&maxPrice=50
+        given().queryParam("author", "Joshua Bloch")
+               .queryParam("maxPrice", 50)
+        .when().get("/books");
+
+        // Path param   ->  /books/2
+        given().pathParam("id", 2)
+        .when().get("/books/{id}");
+
+        // Shortcut: value right in the call
+        when().get("/books/{id}", 2);
+    </script>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Kind</th>
+                <th>Where it goes</th>
+                <th>Method</th>
+                <th>Use for</th>
+            </tr>
+            <tr>
+                <td>Query param</td>
+                <td>After <code>?</code> in the URL</td>
+                <td><code>queryParam()</code></td>
+                <td>Filter, sort, page: <code>?page=2</code></td>
+            </tr>
+            <tr>
+                <td>Path param</td>
+                <td>Inside the path</td>
+                <td><code>pathParam()</code></td>
+                <td>Pick one item: <code>/books/2</code></td>
+            </tr>
+            <tr>
+                <td>Form param</td>
+                <td>In the body as <code>a=1&amp;b=2</code></td>
+                <td><code>formParam()</code></td>
+                <td>Login forms, OAuth token calls</td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout int"><b>Interview trap: <code>param()</code></b>
+        <p><code>param()</code> guesses for you. On a GET it becomes a <b>query</b> param. On a POST it becomes a <b>form</b>
+            param. Because guessing is risky, use <code>queryParam()</code> or <code>formParam()</code> instead.</p>
+    </div>
+
+    <h3>Headers and content type</h3>
+    <script type="text/x-code" data-lang="java" data-title="Headers">
+        given().header("Authorization", "Bearer abc123")
+               .header("Accept", "application/json")
+               .contentType(ContentType.JSON)        // same as header("Content-Type", ...)
+               .headers(Map.of("X-App", "web", "X-Lang", "en"))
+    </script>
+    <p><code>contentType</code> tells the server what the <b>body you send</b> is. <code>accept</code> tells the server
+        what you <b>want back</b>. Forgetting <code>contentType</code> on a POST is the most common reason for a <code>415</code>
+        error.</p>
+
+    <h3>POST, PUT, PATCH, DELETE</h3>
+    <script type="text/x-code" data-lang="java" data-title="Write calls">
+        String body = """
+            { "title": "Clean Code", "author": "Robert Martin", "year": 2008 }
+            """;
+
+        // POST = create
+        given().contentType(ContentType.JSON).body(body)
+        .when().post("/books")
+        .then().statusCode(201);
+
+        // PUT = replace everything
+        given().contentType(ContentType.JSON).body(newBody)
+        .when().put("/books/{id}", 7)
+        .then().statusCode(200);
+
+        // PATCH = change one field
+        given().contentType(ContentType.JSON).body("{\"price\": 25}")
+        .when().patch("/books/{id}", 7)
+        .then().statusCode(200);
+
+        // DELETE = remove
+        when().delete("/books/{id}", 7)
+        .then().statusCode(204);
+    </script>
+    <p>The body can be a <b>String</b>, a <b>Map</b>, a <b>file</b> or a <b>Java object</b> (see the POJO section
+        later).</p>
+    <script type="text/x-code" data-lang="java" data-title="Other things you can send">
+        .formParam("username", "admin")                 // form data
+        .cookie("session", "abc")                       // cookie
+        .multiPart("file", new File("data/photo.png"))  // upload a file
+        .body(new File("src/test/resources/book.json")) // body from a file
+    </script>
+
+    <div class="lab" data-lab="lab"></div>
+    <div class="callout tip"><b>Try this</b>
+        <p>Press <b>Create without token</b>. You get 401. Now add the line <code>Authorization: Bearer tok_8f3a</code>
+            in the headers and run again.</p></div>
+    <div class="practice" data-quiz="requests"></div>
+</section>
+
+<section class="sec p3" id="checks" data-part="3" data-pname="Core Skills" data-title="Checking responses"
+         data-goal="Check status, headers, body values and speed with Hamcrest matchers.">
+    <p class="lead">A test is only useful if it <b>checks</b> something. After <code>then()</code> you can check as many
+        things as you like.</p>
+    <script type="text/x-code" data-lang="java" data-title="Everything you can check">
+        .then()
+            .statusCode(200)                                  // the code
+            .statusLine(containsString("OK"))                 // "HTTP/1.1 200 OK"
+            .contentType(ContentType.JSON)                    // the body type
+            .header("Server", notNullValue())                 // a header
+            .time(lessThan(2000L))                            // under 2 seconds (long!)
+            .body("title", equalTo("Clean Code"))             // a body value
+            .body("books", hasSize(3))
+            .body("books.title", hasItem("Effective Java"));
+    </script>
+    <h3>What is Hamcrest?</h3>
+    <p><b>Hamcrest</b> is a small library of "matchers". A matcher is a word like <code>equalTo</code> that describes
+        what you expect. REST Assured comes with it. You write <code>body("year", greaterThan(2000))</code> and it reads
+        like a sentence.</p>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Matcher</th>
+                <th>Means</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>equalTo(x)</code></td>
+                <td>exactly x</td>
+                <td><code>body("id", equalTo(7))</code></td>
+            </tr>
+            <tr>
+                <td><code>not(...)</code></td>
+                <td>the opposite</td>
+                <td><code>not(equalTo(0))</code></td>
+            </tr>
+            <tr>
+                <td><code>containsString(s)</code></td>
+                <td>text has s inside</td>
+                <td><code>body("title", containsString("Java"))</code></td>
+            </tr>
+            <tr>
+                <td><code>startsWith / endsWith</code></td>
+                <td>text begins / ends with</td>
+                <td><code>startsWith("Eff")</code></td>
+            </tr>
+            <tr>
+                <td><code>greaterThan / lessThan</code></td>
+                <td>number compare</td>
+                <td><code>lessThan(50f)</code></td>
+            </tr>
+            <tr>
+                <td><code>hasSize(n)</code></td>
+                <td>list has n items</td>
+                <td><code>body("books", hasSize(3))</code></td>
+            </tr>
+            <tr>
+                <td><code>hasItem(x)</code></td>
+                <td>list contains x</td>
+                <td><code>hasItem("Clean Code")</code></td>
+            </tr>
+            <tr>
+                <td><code>hasItems(a, b)</code></td>
+                <td>list contains all of these, any order</td>
+                <td><code>hasItems("A", "B")</code></td>
+            </tr>
+            <tr>
+                <td><code>contains(a, b)</code></td>
+                <td>list is <b>exactly</b> these, same order</td>
+                <td><code>contains("A", "B", "C")</code></td>
+            </tr>
+            <tr>
+                <td><code>containsInAnyOrder(...)</code></td>
+                <td>exactly these, any order</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><code>everyItem(m)</code></td>
+                <td>all items match m</td>
+                <td><code>everyItem(greaterThan(0f))</code></td>
+            </tr>
+            <tr>
+                <td><code>notNullValue() / nullValue()</code></td>
+                <td>exists / is null</td>
+                <td><code>body("token", notNullValue())</code></td>
+            </tr>
+            <tr>
+                <td><code>empty()</code></td>
+                <td>list or text is empty</td>
+                <td><code>body("errors", empty())</code></td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout warn"><b>Trap 1: decimals are floats</b>
+        <p>REST Assured reads <code>32.5</code> as a <b>float</b>. So write <code>equalTo(32.5f)</code>. With plain
+            <code>32.5</code> (a double) the test fails even though it looks the same. Very large whole numbers are
+            <code>long</code>: <code>5000000000L</code>.</p></div>
+    <div class="callout warn"><b>Trap 2: <code>hasItems</code> vs <code>contains</code></b>
+        <p><code>hasItems("A","B")</code> passes for the list <code>[A, B, C]</code>. <code>contains("A","B")</code>
+            fails for it, because <code>contains</code> wants the <b>whole list</b>.</p></div>
+    <div class="lab" data-lab="matcher"></div>
+    <h3>Check more than one thing in one go</h3>
+    <script type="text/x-code" data-lang="java" data-title="Many checks">
+        .then()
+            .body("title", equalTo("Clean Code"),
+                  "year",  equalTo(2008),
+                  "price", equalTo(32.5f));     // one body() call, many pairs
+    </script>
+    <p>If more than one check fails, REST Assured reports <b>all</b> of them in one message (for example "2 expectations
+        failed"). You see every problem in one run.</p>
+    <h3>Check with plain Java asserts too</h3>
+    <script type="text/x-code" data-lang="java" data-title="Extract first, then assert">
+        Response r = given().when().get("/books/2");
+
+        Assert.assertEquals(r.getStatusCode(), 200);
+        Assert.assertEquals(r.jsonPath().getString("author"), "Joshua Bloch");
+        Assert.assertTrue(r.getTime() < 2000);
+    </script>
+    <div class="practice" data-quiz="checks"></div>
+</section>
+
+<section class="sec p3" id="gpath" data-part="3" data-pname="Core Skills" data-title="JSON paths (GPath)"
+         data-goal="Pick any value out of any JSON, including lists, filters and totals.">
+    <p class="lead">The text inside <code>body("...")</code> is a <b>path</b> into the JSON. REST Assured uses a Groovy
+        path style called <b>GPath</b>. With it you can even filter lists and add numbers up.</p>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>You want</th>
+                <th>Path</th>
+                <th>Result for the sample below</th>
+            </tr>
+            <tr>
+                <td>A top-level value</td>
+                <td><code>shop</code></td>
+                <td>"Book Corner"</td>
+            </tr>
+            <tr>
+                <td>Inside an object</td>
+                <td><code>owner.city</code></td>
+                <td>"Pune"</td>
+            </tr>
+            <tr>
+                <td>One list item</td>
+                <td><code>books[0].title</code></td>
+                <td>"Clean Code"</td>
+            </tr>
+            <tr>
+                <td>The last item</td>
+                <td><code>books[-1].title</code></td>
+                <td>"Java Concurrency in Practice"</td>
+            </tr>
+            <tr>
+                <td>One field of <b>every</b> item</td>
+                <td><code>books.title</code></td>
+                <td>a list of 4 titles</td>
+            </tr>
+            <tr>
+                <td>How many items</td>
+                <td><code>books.size()</code></td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>Filter a list</td>
+                <td><code>books.findAll { it.price &gt; 30 }.title</code></td>
+                <td>titles of books above 30</td>
+            </tr>
+            <tr>
+                <td>Find one item</td>
+                <td><code>books.find { it.id == 2 }.author</code></td>
+                <td>"Joshua Bloch"</td>
+            </tr>
+            <tr>
+                <td>Add up numbers</td>
+                <td><code>books.price.sum()</code></td>
+                <td>156.49</td>
+            </tr>
+            <tr>
+                <td>Biggest / smallest</td>
+                <td><code>books.price.max()</code></td>
+                <td>50</td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout know"><b>How to read <code>{ it.price &gt; 30 }</code></b>
+        <p><code>it</code> means "the item I am looking at right now". <code>findAll</code> keeps every item where the
+            test is true. <code>find</code> returns the first one.</p></div>
+    <div class="callout warn"><b>Careful</b>
+        <ul>
+            <li>Inside Java strings use <b>single quotes</b> for text: <code>"books.find { it.author == 'Joshua Bloch'
+                }.id"</code></li>
+            <li>Key with a dash or space? Wrap it in single quotes: <code>"data.'first-name'"</code></li>
+            <li>JSON that is a list at the top: use <code>[0].id</code> for an item, and <code>size()</code> for the
+                count.
+            </li>
+        </ul>
+    </div>
+    <div class="lab" data-lab="gpath"></div>
+    <script type="text/x-code" data-lang="java" data-title="Using paths in a test">
+        given().when().get("/books")
+        .then()
+            .body("books.findAll { it.price > 30 }.title", hasItems("Clean Code", "Effective Java"))
+            .body("books.find { it.id == 2 }.author", equalTo("Joshua Bloch"))
+            .body("books.price.sum()", greaterThan(100f));
+    </script>
+    <div class="practice" data-quiz="gpath"></div>
+</section>
+
+<section class="sec p3" id="extract" data-part="3" data-pname="Core Skills"
+         data-title="Extracting data and chaining calls"
+         data-goal="Take a value out of one response and use it in the next request. Real tests do this all the time.">
+    <p class="lead">Real flows have many steps: log in, <b>get a token</b>, create a book, <b>get its id</b>, then read
+        or delete it. To do this you <b>extract</b> a value from one response and feed it to the next call.</p>
+    <h3>Ways to get values out</h3>
+    <script type="text/x-code" data-lang="java" data-title="extract() and Response">
+        // 1. One value
+        String token = given().contentType(JSON).body(login)
+            .when().post("/login")
+            .then().statusCode(200)
+            .extract().path("token");                 // type is guessed from the left side
+
+        // 2. The whole Response object, then ask it anything
+        Response res = given().when().get("/books/2").then().extract().response();
+        int    code  = res.getStatusCode();
+        String body  = res.asString();                // body as text
+        String title = res.jsonPath().getString("title");
+        List<String> titles = res.jsonPath().getList("books.title");
+        long   ms    = res.getTime();
+        String type  = res.getHeader("Content-Type");
+
+        // 3. Check AND extract in one chain (extract() must be last)
+        int id = given()...post("/books")
+            .then().statusCode(201).body("title", equalTo("Clean Code"))
+            .extract().path("id");
+    </script>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Method</th>
+                <th>Gives you</th>
+            </tr>
+            <tr>
+                <td><code>path("a.b")</code></td>
+                <td>any value (type guessed)</td>
+            </tr>
+            <tr>
+                <td><code>jsonPath().getString / getInt / getList / getMap</code></td>
+                <td>a value of the type you ask for</td>
+            </tr>
+            <tr>
+                <td><code>asString()</code></td>
+                <td>the full body as text</td>
+            </tr>
+            <tr>
+                <td><code>response()</code></td>
+                <td>the whole Response object</td>
+            </tr>
+            <tr>
+                <td><code>as(Book.class)</code></td>
+                <td>a Java object (see POJO section)</td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout warn"><b>Common error: ClassCastException</b>
+        <p>A JSON number can arrive as <code>Integer</code>, <code>Long</code> or <code>Float</code>. If you write
+            <code>long id = ...path("id")</code> but it came as <code>Integer</code>, Java throws an error. Use <code>jsonPath().getLong("id")</code>
+            to be safe.</p></div>
+    <h3>Run a full chain</h3>
+    <p>Press the button to run each step against the pretend library API. Watch the token and the id move from step to
+        step.</p>
+    <div class="lab" data-lab="chain"></div>
+    <h3>Sharing data between test methods</h3>
+    <ul>
+        <li>Keep it in a field: <code>private String token;</code> set in <code>@BeforeClass</code>.</li>
+        <li>Keep tests <b>independent</b> if you can. Each test creates its own data and cleans up.</li>
+        <li>If one test truly needs another, use TestNG <code>dependsOnMethods</code> (use rarely).</li>
+    </ul>
+    <div class="practice" data-quiz="extract"></div>
+</section>
+
+<section class="sec p3" id="auth" data-part="3" data-pname="Core Skills" data-title="Authentication"
+         data-goal="Prove who you are to the API. Know basic, bearer token, OAuth2 and API key.">
+    <p class="lead">Many APIs are locked. <b>Authentication</b> is how your test shows it has the right to enter.</p>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>How it works</th>
+                <th>REST Assured</th>
+            </tr>
+            <tr>
+                <td>Basic</td>
+                <td>Username and password, sent with every call</td>
+                <td><code>auth().basic("user","pass")</code></td>
+            </tr>
+            <tr>
+                <td>Preemptive basic</td>
+                <td>Same, but sent in the <b>first</b> call</td>
+                <td><code>auth().preemptive().basic(...)</code></td>
+            </tr>
+            <tr>
+                <td>Bearer token</td>
+                <td>Log in once, then send the token</td>
+                <td><code>header("Authorization","Bearer "+token)</code></td>
+            </tr>
+            <tr>
+                <td>OAuth 2</td>
+                <td>Get an access token from an auth server, send it as bearer</td>
+                <td><code>auth().oauth2(token)</code></td>
+            </tr>
+            <tr>
+                <td>API key</td>
+                <td>A secret key in a header or in the URL</td>
+                <td><code>header("x-api-key", key)</code> or <code>queryParam("key", key)</code></td>
+            </tr>
+            <tr>
+                <td>Form</td>
+                <td>Log in through a login form</td>
+                <td><code>auth().form("u","p", config)</code></td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout int"><b>Interview favourite: challenged vs preemptive</b>
+        <p>With plain <code>basic()</code>, REST Assured first sends the request <b>without</b> credentials. The server
+            answers <code>401</code>. Then REST Assured sends it again <b>with</b> credentials. That is two calls.
+            <code>preemptive().basic()</code> sends the credentials the first time, so there is one call. Use preemptive
+            when the server does not send a proper 401 challenge.</p></div>
+    <h3>The usual token flow</h3>
+    <script type="text/x-code" data-lang="java" data-title="Login once, use everywhere">
+        @BeforeClass
+        public void login() {
+            token = given().contentType(ContentType.JSON)
+                .body(Map.of("username", "admin", "password", "secret123"))
+            .when().post("/login")
+            .then().statusCode(200)
+            .extract().path("token");
+
+            // every request in this class now sends the token
+            requestSpec = new RequestSpecBuilder()
+                .setBaseUri("https://api.shop.com")
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+        }
+    </script>
+    <script type="text/x-code" data-lang="java" data-title="OAuth 2 (client credentials)">
+        String accessToken = given()
+                .formParam("grant_type", "client_credentials")
+                .formParam("client_id", "my-app")
+                .formParam("client_secret", "s3cret")
+            .when().post("https://auth.shop.com/oauth/token")
+            .then().statusCode(200)
+            .extract().path("access_token");
+
+        given().auth().oauth2(accessToken).when().get("/orders").then().statusCode(200);
+    </script>
+    <h3>Try the three answers</h3>
+    <p>The pretend API uses these rules: no login gives <b>401</b>, a read-only user gives <b>403</b>, and a good login
+        lets you delete.</p>
+    <div class="lab" data-lab="authlab"></div>
+    <div class="callout warn"><b>Never do this</b>
+        <p>Do not type real passwords or tokens in your test code. Read them from environment variables or a config file
+            that is not saved in Git.</p></div>
+    <div class="practice" data-quiz="auth"></div>
+</section>

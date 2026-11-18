@@ -1,0 +1,93 @@
+/* Base: reset and plain elements (links, headings, form fields, buttons). */
+/* Reset and plain elements. */
+* {
+    box-sizing: border-box
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 76px
+}
+
+body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--side);
+    z-index: 60
+}
+
+a {
+    color: var(--c2i)
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--display);
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0
+}
+
+p {
+    margin: 0 0 12px
+}
+
+code {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: color-mix(in srgb, var(--ink) 8%, var(--surface));
+    padding: 1px 6px;
+    border-radius: 5px;
+    overflow-wrap: anywhere
+}
+
+:focus-visible {
+    outline: 2px solid var(--c2);
+    outline-offset: 2px
+}
+
+button {
+    font: inherit;
+    cursor: pointer
+}
+
+/* Form fields share one look. */
+input, select, textarea {
+    font: inherit;
+    font-size: 14px;
+    background: var(--surface2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    width: 100%;
+    min-width: 0
+}
+
+textarea {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical
+}
+
+label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px
+}

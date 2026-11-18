@@ -1,0 +1,153 @@
+<!-- ===================== PART 2 ===================== -->
+<section class="sec p2" id="setup" data-part="2" data-pname="Getting Started" data-title="Setup and your first test"
+         data-goal="Create a Maven project, add REST Assured and run a real test against a real API.">
+    <h3>What you need</h3>
+    <ul>
+        <li><b>Java</b> (JDK 11 or 17 is a safe choice) and <b>Maven</b>.</li>
+        <li>An IDE such as IntelliJ IDEA or Eclipse.</li>
+        <li>Internet, because the first test calls a free practice API.</li>
+    </ul>
+    <h3>Step 1: add the libraries</h3>
+    <p>Open <code>pom.xml</code> and add these inside <code>&lt;dependencies&gt;</code>. Each one has a job.</p>
+
+    <script type="text/x-code" data-lang="xml" data-title="pom.xml">
+        <dependencies>
+
+          <!-- REST Assured: sends requests and checks responses -->
+          <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+          </dependency>
+
+          <!-- TestNG: runs the tests (or use JUnit 5) -->
+          <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.10.2</version>
+            <scope>test</scope>
+          </dependency>
+
+          <!-- Jackson: turns Java objects into JSON and back -->
+          <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.2</version>
+            <scope>test</scope>
+          </dependency>
+
+          <!-- Only if you check JSON schema -->
+          <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+          </dependency>
+        </dependencies>
+    </script>
+
+    <div class="callout tip"><b>Tip</b>
+        <p>Version numbers move on. Search "rest-assured" on Maven Central and use the newest version. Keep <code>rest-assured</code>
+            and <code>json-schema-validator</code> on the <b>same</b> version.</p></div>
+
+    <h3>Step 2: the folder layout</h3>
+    <script type="text/x-code" data-lang="plain" data-title="project folders">
+        my-api-tests/
+        ├─ pom.xml
+        └─ src/
+           └─ test/
+              ├─ java/
+              │   └─ tests/FirstTest.java     <- your tests live here
+              └─ resources/                    <- schema files, test data
+    </script>
+
+    <h3>Step 3: your first test</h3>
+    <p>We call <code>jsonplaceholder.typicode.com</code>, a free fake API made for practice. Click each line to see what
+        it does.</p>
+    <div class="xl" data-xl="first"></div>
+    <p>Run it with your IDE's green button, or from the terminal:</p>
+    <script type="text/x-code" data-lang="plain" data-title="terminal">
+        mvn test
+    </script>
+
+    <h3>Why the two "import static" lines?</h3>
+    <p>Without them, you must write <code>RestAssured.given()</code> and <code>Matchers.equalTo(1)</code> every time. A
+        <b>static import</b> lets you write <code>given()</code> and <code>equalTo(1)</code> alone. Everyone uses them,
+        so you will see them in every interview example.</p>
+    <div class="callout warn"><b>Setup errors you will meet</b>
+        <ul>
+            <li><code>given()</code> is red → you forgot <code>import static io.restassured.RestAssured.*;</code></li>
+            <li><code>equalTo()</code> is red → you forgot <code>import static org.hamcrest.Matchers.*;</code></li>
+            <li><code>matchesJsonSchemaInClasspath</code> not found → add the <code>json-schema-validator</code>
+                dependency.
+            </li>
+            <li>Odd errors after adding JUnit → put <code>rest-assured</code> <i>above</i> junit in the pom (a known
+                library order problem).
+            </li>
+        </ul>
+    </div>
+    <div class="practice" data-quiz="setup"></div>
+</section>
+
+<section class="sec p2" id="gwt" data-part="2" data-pname="Getting Started" data-title="Given, When, Then"
+         data-goal="Understand the three-part shape of every REST Assured test.">
+    <p class="lead">Every REST Assured test tells a small story in three parts. It comes from a way of writing tests
+        called BDD (behaviour-driven development).</p>
+    <div class="cols">
+        <div class="card" style="border-top:5px solid var(--c2)"><h4 style="color:var(--c2i)">given()</h4>
+            <p><b>Set the scene.</b> Everything about the request: base URL, headers, parameters, body, login.</p></div>
+        <div class="card" style="border-top:5px solid var(--c3)"><h4 style="color:var(--c3i)">when()</h4>
+            <p><b>Do the action.</b> Choose the method and path: <code>get("/books")</code>, <code>post(...)</code>.</p>
+        </div>
+        <div class="card" style="border-top:5px solid var(--c5)"><h4 style="color:var(--c5i)">then()</h4>
+            <p><b>Check the result.</b> Status code, headers, body values, response time.</p></div>
+    </div>
+    <script type="text/x-code" data-lang="java" data-title="The shape">
+        given()
+            .baseUri("https://jsonplaceholder.typicode.com")   // set the scene
+            .queryParam("userId", 1)
+        .when()
+            .get("/posts")                                    // do the action
+        .then()
+            .statusCode(200)                                  // check the result
+            .body("size()", equalTo(10));
+    </script>
+    <h3>Other ways to write the same test</h3>
+    <p>The style is only a habit. These all work.</p>
+    <div class="tabs">
+        <script type="text/x-code" data-lang="java" data-tab="BDD style">
+            given().baseUri(BASE).when().get("/posts/1").then().statusCode(200);
+        </script>
+        <script type="text/x-code" data-lang="java" data-tab="Keep the Response">
+            Response response = given().baseUri(BASE).when().get("/posts/1");
+
+            int code = response.getStatusCode();
+            String title = response.jsonPath().getString("title");
+            Assert.assertEquals(code, 200);   // TestNG assert
+        </script>
+        <script type="text/x-code" data-lang="java" data-tab="Short form">
+            // given() is optional if you set nothing special
+            baseURI = "https://jsonplaceholder.typicode.com";
+            get("/posts/1").then().statusCode(200);
+        </script>
+    </div>
+    <div class="callout know"><b>Tiny details</b>
+        <ul>
+            <li><code>and()</code> and <code>with()</code> do nothing. They only make the line read better: <code>.given().header(...).and().body(...)</code>.
+            </li>
+            <li>You can write many checks after <code>then()</code>. REST Assured tests all of them and reports every
+                failure together.
+            </li>
+            <li>The semicolon goes only at the very end.</li>
+        </ul>
+    </div>
+
+    <div class="lab" data-lab="puzzle"></div>
+
+    <div class="callout int"><b>Interview favourite</b>
+        <p><i>"What is given-when-then?"</i> Answer: "It is the BDD style. <code>given</code> prepares the request,
+            <code>when</code> sends it, <code>then</code> validates the response. It makes tests easy to read, even for
+            people who do not code."</p></div>
+    <div class="practice" data-quiz="gwt"></div>
+</section>

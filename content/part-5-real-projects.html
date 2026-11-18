@@ -1,0 +1,263 @@
+<!-- ===================== PART 5 ===================== -->
+<section class="sec p5" id="testng" data-part="5" data-pname="Real Projects"
+         data-title="TestNG and JUnit with REST Assured"
+         data-goal="Run many tests, share setup, feed them data, and assert correctly.">
+    <p class="lead">REST Assured sends and checks calls. <b>TestNG</b> or <b>JUnit</b> decides <i>which</i> tests run,
+        <i>when</i>, and what counts as a pass. Most interviews ask about TestNG.</p>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Job</th>
+                <th>TestNG</th>
+                <th>JUnit 5</th>
+            </tr>
+            <tr>
+                <td>A test</td>
+                <td><code>@Test</code></td>
+                <td><code>@Test</code></td>
+            </tr>
+            <tr>
+                <td>Once before all tests in class</td>
+                <td><code>@BeforeClass</code></td>
+                <td><code>@BeforeAll</code> (static)</td>
+            </tr>
+            <tr>
+                <td>Before each test</td>
+                <td><code>@BeforeMethod</code></td>
+                <td><code>@BeforeEach</code></td>
+            </tr>
+            <tr>
+                <td>Once before the whole run</td>
+                <td><code>@BeforeSuite</code></td>
+                <td>(use an extension)</td>
+            </tr>
+            <tr>
+                <td>After each / after all</td>
+                <td><code>@AfterMethod</code> / <code>@AfterClass</code></td>
+                <td><code>@AfterEach</code> / <code>@AfterAll</code></td>
+            </tr>
+            <tr>
+                <td>Data-driven</td>
+                <td><code>@DataProvider</code></td>
+                <td><code>@ParameterizedTest</code> + <code>@CsvSource</code></td>
+            </tr>
+            <tr>
+                <td>Groups</td>
+                <td><code>groups = "smoke"</code></td>
+                <td><code>@Tag("smoke")</code></td>
+            </tr>
+            <tr>
+                <td>Skip a test</td>
+                <td><code>enabled = false</code></td>
+                <td><code>@Disabled</code></td>
+            </tr>
+            <tr>
+                <td>Order / depends</td>
+                <td><code>priority</code>, <code>dependsOnMethods</code></td>
+                <td><code>@Order</code></td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout warn"><b>Interview trap: the order of assertEquals</b>
+        <p><b>TestNG</b>: <code>Assert.assertEquals(<u>actual</u>, <u>expected</u>)</code>. <b>JUnit</b>: <code>assertEquals(<u>expected</u>,
+            <u>actual</u>)</code>. The order is opposite. Mixing them up still passes or fails correctly, but the
+            failure message will be confusing.</p></div>
+    <h3>Data-driven test</h3>
+    <p>Run the same test with many inputs. Great for checking many users, books or error cases.</p>
+    <script type="text/x-code" data-lang="java" data-title="DataProvider">
+        @DataProvider(name = "books")
+        public Object[][] books() {
+            return new Object[][] {
+                { 1, "Clean Code" },
+                { 2, "Effective Java" },
+                { 3, "Head First Java" }
+            };
+        }
+
+        @Test(dataProvider = "books")
+        public void titleMatchesId(int id, String expectedTitle) {
+            given().spec(reqSpec).pathParam("id", id)
+            .when().get("/books/{id}")
+            .then().statusCode(200).body("title", equalTo(expectedTitle));
+        }
+    </script>
+    <h3>Soft assertions</h3>
+    <p>A normal assert stops the test at the first failure. <b>SoftAssert</b> keeps going and reports all failures at
+        the end.</p>
+    <script type="text/x-code" data-lang="java" data-title="SoftAssert">
+        SoftAssert soft = new SoftAssert();
+        Response r = given().spec(reqSpec).when().get("/books/2");
+        soft.assertEquals(r.getStatusCode(), 200);
+        soft.assertEquals(r.jsonPath().getString("author"), "Joshua Bloch");
+        soft.assertEquals(r.jsonPath().getInt("year"), 2018);
+        soft.assertAll();            // do not forget this, or nothing is reported
+    </script>
+    <h3>Run groups and in parallel: testng.xml</h3>
+    <script type="text/x-code" data-lang="xml" data-title="testng.xml">
+        <suite name="API Suite" parallel="classes" thread-count="3">
+          <test name="Smoke">
+            <groups><run><include name="smoke"/></run></groups>
+            <classes><class name="tests.BookTests"/></classes>
+          </test>
+        </suite>
+    </script>
+    <div class="practice" data-quiz="testng"></div>
+</section>
+
+<section class="sec p5" id="framework" data-part="5" data-pname="Real Projects" data-title="Building a test framework"
+         data-goal="Organise a clean, reusable project. Interviewers love this topic.">
+    <p class="lead">A <b>framework</b> is just a tidy way to organise your tests so many people can add, run and fix
+        them without a mess.</p>
+    <h3>A simple folder plan</h3>
+    <script type="text/x-code" data-lang="plain" data-title="framework layout">
+        api-tests/
+        ├─ pom.xml
+        ├─ testng.xml
+        └─ src/
+           ├─ main/java/com/team/api/
+           │   ├─ config/     ConfigReader.java, Endpoints.java
+           │   ├─ models/     Book.java, LoginRequest.java       (POJOs)
+           │   ├─ specs/      Specs.java                          (request / response specs)
+           │   ├─ services/   BookService.java, AuthService.java  (the API calls)
+           │   └─ utils/      DataFactory.java, TokenManager.java
+           └─ test/
+               ├─ java/tests/    BaseTest.java, BookTests.java
+               └─ resources/     config.properties, schemas/, testdata/
+    </script>
+    <div class="flow">
+        <div><b>Tests</b><small>what to check</small></div>
+        <span>→</span>
+        <div><b>Services</b><small>how to call the API</small></div>
+        <span>→</span>
+        <div><b>Specs + Config</b><small>URLs, headers, env</small></div>
+        <span>→</span>
+        <div><b>REST Assured</b></div>
+    </div>
+    <p>Tests stay short and clear because the details are hidden in the services.</p>
+    <script type="text/x-code" data-lang="java" data-title="BookService.java">
+        public class BookService {
+            public Response getBook(int id) {
+                return given().spec(Specs.request()).pathParam("id", id)
+                       .when().get(Endpoints.BOOK_BY_ID);
+            }
+            public Response createBook(Book book) {
+                return given().spec(Specs.request()).body(book)
+                       .when().post(Endpoints.BOOKS);
+            }
+        }
+    </script>
+    <script type="text/x-code" data-lang="java" data-title="BookTests.java">
+        public class BookTests extends BaseTest {
+            BookService books = new BookService();
+
+            @Test(groups = "smoke")
+            public void canCreateAndReadBook() {
+                int id = books.createBook(DataFactory.newBook()).then()
+                              .statusCode(201).extract().path("id");
+
+                books.getBook(id).then().statusCode(200).body("title", notNullValue());
+            }
+        }
+    </script>
+    <h3>Pieces most good frameworks have</h3>
+    <ul>
+        <li><b>Config file</b> for URLs per environment: <code>mvn test -Denv=qa</code>.</li>
+        <li><b>Endpoints class</b> so paths are written once.</li>
+        <li><b>POJOs</b> and a <b>data factory</b> to build test data.</li>
+        <li><b>Reports</b>: Allure or ExtentReports.</li>
+        <li><b>Logging</b> and <b>CI</b>: runs on every code change (Jenkins, GitHub Actions).</li>
+        <li><b>Independent tests</b> that create and clean up their own data.</li>
+    </ul>
+    <div class="lab" data-lab="checklist"></div>
+    <div class="practice" data-quiz="framework"></div>
+</section>
+
+<section class="sec p5" id="config" data-part="5" data-pname="Real Projects" data-title="Settings you will meet at work"
+         data-goal="HTTPS problems, timeouts, redirects, files, cookies and waiting for slow APIs.">
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Situation</th>
+                <th>What to use</th>
+            </tr>
+            <tr>
+                <td>Test server has a bad or self-signed certificate</td>
+                <td><code>given().relaxedHTTPSValidation()</code> (testing only!)</td>
+            </tr>
+            <tr>
+                <td>Company proxy</td>
+                <td><code>given().proxy("host", 8080)</code></td>
+            </tr>
+            <tr>
+                <td>Server redirects (301/302)</td>
+                <td>follows by default. Turn off: <code>given().redirects().follow(false)</code></td>
+            </tr>
+            <tr>
+                <td>Slow server, need timeouts</td>
+                <td>see code below</td>
+            </tr>
+            <tr>
+                <td>URL characters get changed</td>
+                <td><code>given().urlEncodingEnabled(false)</code></td>
+            </tr>
+            <tr>
+                <td>Decimals as exact numbers</td>
+                <td><code>JsonPathConfig.numberReturnType(BIG_DECIMAL)</code></td>
+            </tr>
+            <tr>
+                <td>Reset all global settings</td>
+                <td><code>RestAssured.reset()</code></td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/x-code" data-lang="java" data-title="Timeouts">
+        RestAssured.config = RestAssured.config().httpClient(
+            HttpClientConfig.httpClientConfig()
+                .setParam("http.connection.timeout", 5000)   // time to connect (ms)
+                .setParam("http.socket.timeout", 10000));    // time waiting for data (ms)
+    </script>
+    <h3>Cookies, files and waiting</h3>
+    <script type="text/x-code" data-lang="java" data-title="Examples">
+        // Cookie from one response into the next request
+        String session = given().formParam("u","a").formParam("p","b")
+            .when().post("/login").getCookie("JSESSIONID");
+        given().cookie("JSESSIONID", session).when().get("/profile");
+
+        // Upload a file
+        given().multiPart("file", new File("src/test/resources/photo.png"), "image/png")
+        .when().post("/upload").then().statusCode(200);
+
+        // Download a file
+        byte[] bytes = given().when().get("/report.pdf").asByteArray();
+        Files.write(Paths.get("target/report.pdf"), bytes);
+
+        // Wait until a slow job is done (Awaitility library)
+        await().atMost(30, SECONDS).pollInterval(2, SECONDS)
+               .until(() -> get("/jobs/5").path("status").equals("DONE"));
+    </script>
+    <div class="callout know"><b>Good to know</b>
+        <ul>
+            <li><b>Environments:</b> read <code>System.getProperty("env", "qa")</code> and load matching config.</li>
+            <li><b>Parallel runs:</b> global <code>RestAssured.*</code> values are shared by every thread. Prefer specs.
+            </li>
+            <li><b>GraphQL:</b> it is a POST with a JSON body like <code>{"query": "{ books { title } }"}</code>. REST
+                Assured can do that too.
+            </li>
+            <li><b>Content-Type charset:</b> REST Assured may add <code>; charset=ISO-8859-1</code>. Switch off with
+                <code>EncoderConfig.encoderConfig().appendDefaultContentCharsetToContentTypeIfUndefined(false)</code>.
+            </li>
+        </ul>
+    </div>
+    <div class="practice" data-quiz="config"></div>
+</section>
+
+<section class="sec p5" id="errors" data-part="5" data-pname="Real Projects" data-title="Fix common errors"
+         data-goal="Read an error message and know the cause. Interviewers ask: 'What went wrong and how did you fix it?'">
+    <p class="lead">Tap an error to see the cause and the fix.</p>
+    <div id="errlist"></div>
+    <div class="callout int"><b>A good habit to say in the interview</b>
+        <p>"When a test fails, I first read the assertion message, then turn on <code>log().ifValidationFails()</code>
+            to see the request and response. Most problems are a wrong URL, missing header, expired token or changed
+            data."</p></div>
+    <div class="practice" data-quiz="errors"></div>
+</section>

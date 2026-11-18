@@ -1,0 +1,133 @@
+/* Design tokens: colours, fonts, light and dark themes, one accent per part. */
+/* Layout idea: dark navy sidebar with six colour-coded parts; light content column with one accent colour per part. */
+/* Colours, fonts and the six part colours. Change the look here. */
+:root {
+    --bg: #f3f6fb;
+    --surface: #ffffff;
+    --surface2: #f6f8fc;
+    --ink: #0f1b2e;
+    --muted: #53647e;
+    --line: #dbe3ef;
+    --side: #0d1a33;
+    --side-ink: #d9e3f5;
+    --side-muted: #8b9dbb;
+    --c1: #10a39f;
+    --c1i: #0a6b69;
+    --c2: #2f6df2;
+    --c2i: #1c4cc0;
+    --c3: #ee5b48;
+    --c3i: #b43422;
+    --c4: #7c5af0;
+    --c4i: #5835c9;
+    --c5: #22a65c;
+    --c5i: #13703c;
+    --c6: #f0a30a;
+    --c6i: #855000;
+    --on: #ffffff;
+    --ok: #13803d;
+    --bad: #c42d3b;
+    --warn: #9a5b00;
+    --code-bg: #0b1426;
+    --code-bar: #101e3a;
+    --code-ink: #dbe6fb;
+    --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Dark theme when the device is dark, unless the user picked Light. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #0a1120;
+        --surface: #111b30;
+        --surface2: #15213a;
+        --ink: #e7eefb;
+        --muted: #9aabc5;
+        --line: #23344f;
+        --side: #070e1f;
+        --side-ink: #d9e3f5;
+        --side-muted: #8b9dbb;
+        --c1: #2cc8c3;
+        --c1i: #5adcd7;
+        --c2: #5b8cff;
+        --c2i: #93b5ff;
+        --c3: #ff7664;
+        --c3i: #ff9d8f;
+        --c4: #9a7dff;
+        --c4i: #bfaaff;
+        --c5: #3cc778;
+        --c5i: #70dd9f;
+        --c6: #f7b733;
+        --c6i: #f8c96a;
+        --on: #08111f;
+        --ok: #5ad58a;
+        --bad: #ff7f8a;
+        --warn: #f8c96a;
+        --code-bg: #070e1f;
+        --code-bar: #0d1830;
+        color-scheme: dark;
+    }
+}
+
+/* Dark theme when the user picked Dark. */
+:root[data-theme="dark"] {
+    --bg: #0a1120;
+    --surface: #111b30;
+    --surface2: #15213a;
+    --ink: #e7eefb;
+    --muted: #9aabc5;
+    --line: #23344f;
+    --side: #070e1f;
+    --side-ink: #d9e3f5;
+    --side-muted: #8b9dbb;
+    --c1: #2cc8c3;
+    --c1i: #5adcd7;
+    --c2: #5b8cff;
+    --c2i: #93b5ff;
+    --c3: #ff7664;
+    --c3i: #ff9d8f;
+    --c4: #9a7dff;
+    --c4i: #bfaaff;
+    --c5: #3cc778;
+    --c5i: #70dd9f;
+    --c6: #f7b733;
+    --c6i: #f8c96a;
+    --on: #08111f;
+    --ok: #5ad58a;
+    --bad: #ff7f8a;
+    --warn: #f8c96a;
+    --code-bg: #070e1f;
+    --code-bar: #0d1830;
+    color-scheme: dark;
+}
+
+/* Each part sets --ac (fill) and --ac-i (text), so everything inside takes that part colour. */
+.p1 {
+    --ac: var(--c1);
+    --ac-i: var(--c1i)
+}
+
+.p2 {
+    --ac: var(--c2);
+    --ac-i: var(--c2i)
+}
+
+.p3 {
+    --ac: var(--c3);
+    --ac-i: var(--c3i)
+}
+
+.p4 {
+    --ac: var(--c4);
+    --ac-i: var(--c4i)
+}
+
+.p5 {
+    --ac: var(--c5);
+    --ac-i: var(--c5i)
+}
+
+.p6 {
+    --ac: var(--c6);
+    --ac-i: var(--c6i)
+}

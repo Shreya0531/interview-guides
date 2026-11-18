@@ -1,0 +1,438 @@
+/* Live demos (labs) and the interview flashcards. */
+/* ---------- Demo labs ---------- */
+/* Live demo frame. */
+.lab {
+    border: 1px solid color-mix(in srgb, var(--ac) 40%, var(--line));
+    background: var(--surface);
+    border-radius: 16px;
+    margin: 24px 0;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -22px color-mix(in srgb, var(--ac) 80%, #000)
+}
+
+.lab-h {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    align-items: center;
+    padding: 11px 16px;
+    background: color-mix(in srgb, var(--ac) 13%, var(--surface));
+    font: 600 16px var(--display)
+}
+
+.tag {
+    font: 700 10.5px var(--sans);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    background: var(--ac-i);
+    color: var(--on);
+    padding: 3px 9px;
+    border-radius: 99px
+}
+
+.lab-b {
+    padding: 16px
+}
+
+.lab-b > p:first-child {
+    color: var(--muted);
+    font-size: 14.5px
+}
+
+.row {
+    display: grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px
+}
+
+.row.r2 {
+    grid-template-columns:130px minmax(0, 1fr)
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0
+}
+
+.chip {
+    border: 1px solid var(--line);
+    background: var(--surface2);
+    color: var(--ink);
+    border-radius: 99px;
+    padding: 4px 11px;
+    font-size: 13px
+}
+
+.chip:hover {
+    border-color: var(--ac);
+    background: color-mix(in srgb, var(--ac) 12%, var(--surface))
+}
+
+.chip.mono {
+    font-family: var(--mono);
+    font-size: 12.5px
+}
+
+.chip.on {
+    background: var(--ac-i);
+    color: var(--on);
+    border-color: var(--ac-i)
+}
+
+.out {
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 14.5px;
+    min-width: 0
+}
+
+.out pre {
+    margin: 6px 0 0;
+    font: 13px/1.55 var(--mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere
+}
+
+.verdict {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 6px
+}
+
+.res {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 14px;
+    margin: 3px 0
+}
+
+.res i {
+    font-style: normal;
+    font-weight: 700
+}
+
+/* Status code badges: green 2xx, blue 3xx, orange 4xx, red 5xx. */
+.stat {
+    display: inline-block;
+    font: 700 13px var(--mono);
+    padding: 2px 9px;
+    border-radius: 6px;
+    color: #fff
+}
+
+.stat.s2 {
+    background: #168a45
+}
+
+.stat.s3 {
+    background: #2f6df2
+}
+
+.stat.s4 {
+    background: #c9561a
+}
+
+.stat.s5 {
+    background: #c42d3b
+}
+
+.urlparts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font: 15px var(--mono);
+    margin-top: 8px;
+    overflow-wrap: anywhere
+}
+
+.urlparts span {
+    padding: 2px 7px;
+    border-radius: 6px
+}
+
+.u1 {
+    background: color-mix(in srgb, var(--c1) 22%, var(--surface))
+}
+
+.u2 {
+    background: color-mix(in srgb, var(--c2) 22%, var(--surface))
+}
+
+.u3 {
+    background: color-mix(in srgb, var(--c6) 28%, var(--surface))
+}
+
+.u4 {
+    background: color-mix(in srgb, var(--c3) 22%, var(--surface))
+}
+
+.u5 {
+    background: color-mix(in srgb, var(--c4) 22%, var(--surface))
+}
+
+.codes {
+    display: grid;
+    grid-template-columns:repeat(auto-fill, minmax(64px, 1fr));
+    gap: 6px
+}
+
+.codes button {
+    padding: 7px 0;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface2);
+    font: 600 14px var(--mono);
+    color: var(--ink)
+}
+
+.codes button.g2 {
+    border-bottom: 3px solid #168a45
+}
+
+.codes button.g3 {
+    border-bottom: 3px solid #2f6df2
+}
+
+.codes button.g4 {
+    border-bottom: 3px solid #e07a1f
+}
+
+.codes button.g5 {
+    border-bottom: 3px solid #c42d3b
+}
+
+.codes button.on {
+    background: var(--ac-i);
+    color: var(--on)
+}
+
+.jt {
+    font: 13.5px/1.7 var(--mono);
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 14px 16px;
+    border-radius: 12px;
+    overflow-x: auto;
+    white-space: pre
+}
+
+.jt button.jv {
+    background: transparent;
+    border: 0;
+    padding: 0 2px;
+    border-radius: 4px;
+    font: inherit;
+    color: #9fe3a8;
+    cursor: pointer
+}
+
+.jt button.jv.num {
+    color: #ffab91
+}
+
+.jt button.jv.bool {
+    color: #c6a8ff
+}
+
+.jt button.jv:hover, .jt button.jv.on {
+    background: rgba(255, 255, 255, .18);
+    outline: 1px dashed #7ec7ff
+}
+
+.jt .jk {
+    color: #7ec7ff
+}
+
+.puz {
+    display: grid;
+    grid-template-columns:1fr 1fr;
+    gap: 14px
+}
+
+.puz .pile, .puz .built {
+    min-height: 230px;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px
+}
+
+.puz .pile {
+    background: var(--surface2);
+    border: 1px dashed var(--line)
+}
+
+.puz .built {
+    background: var(--code-bg)
+}
+
+.puz button.pl {
+    text-align: left;
+    font: 13px var(--mono);
+    white-space: pre;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    overflow-x: auto
+}
+
+.puz button.pl:hover {
+    border-color: var(--ac)
+}
+
+.puz button.pl.shake {
+    animation: shake .3s;
+    border-color: var(--bad)
+}
+
+.puz .bl {
+    font: 13px var(--mono);
+    color: var(--code-ink);
+    white-space: pre;
+    padding: 3px 8px;
+    overflow-x: auto
+}
+
+@keyframes shake {
+    25% {
+        transform: translateX(-5px)
+    }
+    75% {
+        transform: translateX(5px)
+    }
+}
+
+.stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
+.step {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: var(--surface2)
+}
+
+.step h4 {
+    margin: 0 0 6px;
+    font-size: 15px
+}
+
+/* Flashcard (details element) used for Q&A, coding tasks and errors. */
+.fc {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    margin: 8px 0;
+    overflow: hidden
+}
+
+.fc summary {
+    cursor: pointer;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    list-style: none;
+    font-weight: 600
+}
+
+.fc summary::-webkit-details-marker {
+    display: none
+}
+
+.fc summary::before {
+    content: "+";
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--ac) 18%, var(--surface));
+    color: var(--ac-i);
+    font-weight: 700
+}
+
+.fc[open] summary::before {
+    content: "–"
+}
+
+.fc .lvl {
+    margin-left: auto;
+    flex: none;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase
+}
+
+.lvl.b {
+    background: color-mix(in srgb, var(--c5) 20%, var(--surface));
+    color: var(--c5i)
+}
+
+.lvl.m {
+    background: color-mix(in srgb, var(--c2) 20%, var(--surface));
+    color: var(--c2i)
+}
+
+.lvl.a {
+    background: color-mix(in srgb, var(--c3) 20%, var(--surface));
+    color: var(--c3i)
+}
+
+.fc .ans {
+    padding: 2px 16px 14px 46px;
+    font-size: 15.5px
+}
+
+.fc .ans p:last-child {
+    margin: 0
+}
+
+.fc .ans figure.code {
+    margin: 8px 0
+}
+
+.fc.known summary {
+    opacity: .6
+}
+
+.fc .know {
+    margin-top: 6px
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px
+}
+
+.filters input {
+    max-width: 260px
+}
+
+.mini {
+    font-size: 13px;
+    color: var(--muted)
+}

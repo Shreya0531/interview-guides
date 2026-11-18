@@ -1,0 +1,107 @@
+/* Practice questions. */
+/* ---------- Quiz ---------- */
+/* Practice question box at the end of each section. */
+.practice {
+    margin-top: 34px;
+    border: 1px solid color-mix(in srgb, var(--ac) 40%, var(--line));
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface)
+}
+
+.practice-h {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 11px 16px;
+    background: color-mix(in srgb, var(--ac) 13%, var(--surface));
+    font: 600 16px var(--display)
+}
+
+.score {
+    font: 600 13px var(--sans);
+    color: var(--ac-i)
+}
+
+.q {
+    padding: 14px 16px;
+    border-top: 1px solid var(--line)
+}
+
+.q p.qt {
+    font-weight: 600;
+    margin-bottom: 10px
+}
+
+.q p.qt code {
+    font-weight: 500
+}
+
+.opts {
+    display: grid;
+    gap: 7px
+}
+
+.opt {
+    display: flex;
+    gap: 10px;
+    text-align: left;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface2);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.45
+}
+
+.opt:hover:not([disabled]) {
+    border-color: var(--ac)
+}
+
+.opt b {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line)
+}
+
+/* Right answer is green, wrong pick is red. */
+.opt.right {
+    background: color-mix(in srgb, var(--ok) 15%, var(--surface));
+    border-color: var(--ok)
+}
+
+.opt.wrong {
+    background: color-mix(in srgb, var(--bad) 14%, var(--surface));
+    border-color: var(--bad)
+}
+
+.opt[disabled] {
+    cursor: default
+}
+
+.exp {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--surface2);
+    font-size: 14.5px;
+    border: 1px solid var(--line)
+}
+
+.exp b.r {
+    color: var(--ok)
+}
+
+.exp b.w {
+    color: var(--bad)
+}

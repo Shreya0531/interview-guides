@@ -1,0 +1,329 @@
+<!-- Each <section> needs: id, data-part (1-6), data-pname, data-title, data-goal. The header, menu entry and footer are built from these. Placeholders: data-lab (demo), data-quiz (practice), data-xl (click-to-explain). Code goes in <script type="text/x-code" data-lang="java">. -->
+<!-- ===================== PART 1 ===================== -->
+<section class="sec p1" id="http" data-part="1" data-pname="Basics" data-title="APIs and HTTP in 10 minutes"
+         data-goal="Understand requests, responses, methods and status codes. Every REST Assured test is built on these ideas.">
+    <p class="lead">An <b>API</b> is a way for one program to talk to another program. Think of a restaurant. You (the
+        <b>client</b>) tell the waiter (the <b>API</b>) what you want. The waiter goes to the kitchen (the <b>server</b>)
+        and brings your food (the <b>response</b>) back.</p>
+
+    <h3>Request and response</h3>
+    <p>Every API call is a pair: you send a <b>request</b>, the server sends back a <b>response</b>. In API testing,
+        your test code plays the client and checks the response.</p>
+    <div class="flow">
+        <div><b>Your test</b><small>the client</small></div>
+        <span>→</span>
+        <div><b>Request</b><small>method + URL + headers + body</small></div>
+        <span>→</span>
+        <div><b>Server</b><small>the API</small></div>
+        <span>→</span>
+        <div><b>Response</b><small>status code + headers + body</small></div>
+    </div>
+    <div class="cols">
+        <div class="card"><h4>A request has</h4>
+            <ul>
+                <li><b>Method</b>: what to do (GET, POST…)</li>
+                <li><b>URL</b>: where to do it</li>
+                <li><b>Headers</b>: extra info (like login token)</li>
+                <li><b>Body</b>: data you send (optional)</li>
+            </ul>
+        </div>
+        <div class="card"><h4>A response has</h4>
+            <ul>
+                <li><b>Status code</b>: did it work? (200, 404…)</li>
+                <li><b>Headers</b>: info about the answer</li>
+                <li><b>Body</b>: the data you get back</li>
+                <li><b>Time</b>: how long it took</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>Read a URL</h3>
+    <p>A URL is an address. REST Assured has a separate place for each part of it, so you must know the parts.</p>
+    <div class="lab" data-lab="url"></div>
+
+    <h3>HTTP methods</h3>
+    <p>The method tells the server what you want to do. Two words you must know for interviews:</p>
+    <ul>
+        <li><b>Safe</b>: does not change any data on the server.</li>
+        <li><b>Idempotent</b> (say: eye-dem-POH-tent): calling it many times leaves the server in the same state as
+            calling it once.
+        </li>
+    </ul>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Method</th>
+                <th>Use it to</th>
+                <th>Safe?</th>
+                <th>Idempotent?</th>
+                <th>Usual success code</th>
+            </tr>
+            <tr>
+                <td><code>GET</code></td>
+                <td>Read data</td>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>200</td>
+            </tr>
+            <tr>
+                <td><code>POST</code></td>
+                <td>Create something new</td>
+                <td>No</td>
+                <td>No</td>
+                <td>201</td>
+            </tr>
+            <tr>
+                <td><code>PUT</code></td>
+                <td>Replace the whole thing</td>
+                <td>No</td>
+                <td>Yes</td>
+                <td>200 or 204</td>
+            </tr>
+            <tr>
+                <td><code>PATCH</code></td>
+                <td>Change only some fields</td>
+                <td>No</td>
+                <td>Not always</td>
+                <td>200</td>
+            </tr>
+            <tr>
+                <td><code>DELETE</code></td>
+                <td>Remove something</td>
+                <td>No</td>
+                <td>Yes</td>
+                <td>200 or 204</td>
+            </tr>
+            <tr>
+                <td><code>HEAD</code></td>
+                <td>Like GET, but headers only</td>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>200</td>
+            </tr>
+            <tr>
+                <td><code>OPTIONS</code></td>
+                <td>Ask what is allowed</td>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>200</td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout know"><b>Easy example</b>
+        <p>Delete book 7 three times. After the first call the book is gone. The next calls change nothing more. That is
+            idempotent. Create a book three times with POST and you get three books. That is not idempotent.</p></div>
+    <div class="callout int"><b>Interview favourite: PUT vs PATCH</b>
+        <p><code>PUT</code> sends the <i>full</i> object and replaces the old one. <code>PATCH</code> sends only the
+            fields that change. If you PUT without the "year" field, the year may be erased. With PATCH it stays.</p>
+    </div>
+
+    <h3>Status codes</h3>
+    <p>The first digit tells you the story: <b>2</b> = good, <b>3</b> = go somewhere else, <b>4</b> = you made a
+        mistake, <b>5</b> = the server has a problem.</p>
+    <div class="lab" data-lab="status"></div>
+    <div class="callout warn"><b>401 vs 403</b>
+        <p><b>401</b> = "I do not know who you are" (not logged in, or bad token). <b>403</b> = "I know who you are, but
+            you may not do this" (no permission).</p></div>
+
+    <h3>What does "REST" mean?</h3>
+    <p>REST is a set of simple rules for building APIs. You do not need the textbook. Remember these:</p>
+    <ul>
+        <li><b>Resources have URLs.</b> A book is <code>/books/7</code>, not <code>/getBook?id=7</code>. Use nouns in
+            the URL.
+        </li>
+        <li><b>Methods are the verbs.</b> GET reads, POST creates, and so on.</li>
+        <li><b>Stateless.</b> The server does not remember you between calls. Each request carries what it needs, like a
+            token.
+        </li>
+        <li><b>Client and server are separate.</b> They only talk through requests and responses.</li>
+        <li><b>Usually JSON.</b> Data travels as text, most often JSON.</li>
+    </ul>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>REST</th>
+                <th>SOAP</th>
+            </tr>
+            <tr>
+                <td>A style, uses normal URLs and methods</td>
+                <td>A strict protocol with its own rules</td>
+            </tr>
+            <tr>
+                <td>JSON (or XML)</td>
+                <td>XML only</td>
+            </tr>
+            <tr>
+                <td>Light and fast</td>
+                <td>Heavier, more built-in security rules</td>
+            </tr>
+            <tr>
+                <td>REST Assured is made for this</td>
+                <td>Needs other tools (like SoapUI)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="practice" data-quiz="http"></div>
+</section>
+
+<section class="sec p1" id="json" data-part="1" data-pname="Basics" data-title="JSON: the language of APIs"
+         data-goal="Read any JSON and say the path to any value. You need this skill in every single test.">
+    <p class="lead"><b>JSON</b> is plain text that holds data in a neat shape. Almost every REST API sends and receives
+        JSON.</p>
+    <h3>The five building blocks</h3>
+    <script type="text/x-code" data-lang="json" data-title="book.json">
+        {
+          "id": 7,
+          "title": "Clean Code",
+          "price": 32.5,
+          "inStock": true,
+          "discount": null,
+          "author": { "name": "Robert Martin", "country": "USA" },
+          "tags": ["java", "design", "quality"]
+        }
+    </script>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Piece</th>
+                <th>Looks like</th>
+                <th>In the example</th>
+            </tr>
+            <tr>
+                <td>Object</td>
+                <td><code>{ "key": value }</code></td>
+                <td>the whole thing, and <code>author</code></td>
+            </tr>
+            <tr>
+                <td>Array (list)</td>
+                <td><code>[ a, b, c ]</code></td>
+                <td><code>tags</code></td>
+            </tr>
+            <tr>
+                <td>String</td>
+                <td><code>"text"</code> in double quotes</td>
+                <td><code>"Clean Code"</code></td>
+            </tr>
+            <tr>
+                <td>Number</td>
+                <td><code>7</code> or <code>32.5</code></td>
+                <td><code>id</code>, <code>price</code></td>
+            </tr>
+            <tr>
+                <td>Boolean / null</td>
+                <td><code>true</code> <code>false</code> <code>null</code></td>
+                <td><code>inStock</code>, <code>discount</code></td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout warn"><b>Common JSON mistakes</b>
+        <ul>
+            <li>Keys and strings need <b>double</b> quotes. Single quotes are not valid.</li>
+            <li>No comma after the last item.</li>
+            <li>No comments are allowed inside JSON.</li>
+        </ul>
+    </div>
+
+    <h3>Find the path to any value</h3>
+    <p>To check a value in a test, you must say <i>where</i> it is. Use a dot to go inside an object and
+        <code>[0]</code> to pick an item from a list (counting starts at 0). Click any value below to see its path.</p>
+    <div class="lab" data-lab="jsonclick"></div>
+
+    <h3>JSON vs XML</h3>
+    <div class="tw">
+        <table>
+            <tr>
+                <th></th>
+                <th>JSON</th>
+                <th>XML</th>
+            </tr>
+            <tr>
+                <td>Looks like</td>
+                <td><code>{"name":"Ann"}</code></td>
+                <td><code>&lt;name&gt;Ann&lt;/name&gt;</code></td>
+            </tr>
+            <tr>
+                <td>Size</td>
+                <td>Short</td>
+                <td>Longer (tags open and close)</td>
+            </tr>
+            <tr>
+                <td>Today</td>
+                <td>Used by most APIs</td>
+                <td>Older systems, SOAP</td>
+            </tr>
+        </table>
+    </div>
+    <p>The server also says which one it sends in a header: <code>Content-Type: application/json</code>. REST Assured
+        reads this header to decide how to read the body.</p>
+    <div class="practice" data-quiz="json"></div>
+</section>
+
+<section class="sec p1" id="what" data-part="1" data-pname="Basics" data-title="What is REST Assured?"
+         data-goal="Know what it is, why teams use it and where it fits. This is the first question in most interviews.">
+    <p class="lead"><b>REST Assured</b> is a free Java library for testing REST APIs. You write a few lines of Java that
+        send a request and check the response. The code reads almost like English.</p>
+    <div class="flow">
+        <div><b>TestNG / JUnit</b><small>runs your tests</small></div>
+        <span>→</span>
+        <div><b>REST Assured</b><small>builds the request and checks the answer</small></div>
+        <span>→</span>
+        <div><b>HTTP</b><small>the network call</small></div>
+        <span>→</span>
+        <div><b>Your API</b><small>the thing under test</small></div>
+    </div>
+    <h3>Why teams choose it</h3>
+    <ul>
+        <li><b>Short code.</b> A full test can be 6 lines.</li>
+        <li><b>Easy to read.</b> The <code>given / when / then</code> style tells a story.</li>
+        <li><b>It is just Java.</b> Use loops, classes, files and your own helpers.</li>
+        <li><b>Fits CI/CD.</b> Runs with Maven, Jenkins and GitHub Actions. No screen needed.</li>
+        <li><b>Built-in checks.</b> JSON, XML, headers, cookies, schema, response time.</li>
+    </ul>
+    <h3>REST Assured vs other tools</h3>
+    <div class="tw">
+        <table>
+            <tr>
+                <th>Tool</th>
+                <th>Good for</th>
+                <th>Weak spot</th>
+            </tr>
+            <tr>
+                <td>Postman</td>
+                <td>Quick manual checks, exploring an API</td>
+                <td>Big suites are harder to keep clean in code and review</td>
+            </tr>
+            <tr>
+                <td>REST Assured</td>
+                <td>Automated API tests in a Java project</td>
+                <td>You need to know Java</td>
+            </tr>
+            <tr>
+                <td>Plain Java HttpClient</td>
+                <td>Full control</td>
+                <td>Lots of code for simple things</td>
+            </tr>
+            <tr>
+                <td>JMeter / Gatling</td>
+                <td>Load and speed testing</td>
+                <td>Not for deep functional checks</td>
+            </tr>
+        </table>
+    </div>
+    <div class="callout know"><b>Good to know</b>
+        <ul>
+            <li>Created by Johan Haleby. Since version 3.0 the package name is <code>io.restassured</code> (older
+                versions used <code>com.jayway.restassured</code>).
+            </li>
+            <li>It uses Groovy inside for JSON paths, and Hamcrest for the checks.</li>
+            <li>It does <b>not</b> test web pages (use Selenium for that) and is <b>not</b> a load-testing tool.</li>
+            <li>It has no test runner or report of its own. You pair it with TestNG or JUnit, and a report tool like
+                Allure or Extent.
+            </li>
+        </ul>
+    </div>
+    <div class="callout int"><b>Say this in the interview</b>
+        <p>"REST Assured is a Java library that makes API testing simple. I use it with TestNG and Maven to send
+            requests, check status codes and JSON bodies, and run the tests in a pipeline."</p></div>
+    <div class="practice" data-quiz="what"></div>
+</section>

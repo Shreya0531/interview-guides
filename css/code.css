@@ -1,0 +1,158 @@
+/* Code blocks, tabs and the click-to-explain component. */
+/* ---------- Code ---------- */
+/* Dark code box. The colours stay dark in light and dark themes. */
+figure.code {
+    margin: 14px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--code-bg);
+    border: 1px solid color-mix(in srgb, var(--code-bar) 70%, #000)
+}
+
+figure.code figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 14px;
+    font: 500 12px var(--mono);
+    color: #8ea3c8;
+    background: var(--code-bar)
+}
+
+figure.code figcaption button {
+    background: rgba(255, 255, 255, .08);
+    border: 0;
+    color: #cdd9f2;
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 12px
+}
+
+figure.code figcaption button:hover {
+    background: rgba(255, 255, 255, .16)
+}
+
+figure.code pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font: 13.5px/1.65 var(--mono);
+    color: var(--code-ink);
+    tab-size: 2
+}
+
+figure.code code, .xl code, .jt code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    color: inherit
+}
+
+/* Syntax colours: keyword, string, comment, annotation, number, method. */
+.k {
+    color: #c6a8ff
+}
+
+.s {
+    color: #9fe3a8
+}
+
+.c {
+    color: #6f87ab;
+    font-style: italic
+}
+
+.a {
+    color: #ffd37a
+}
+
+.nn {
+    color: #ffab91
+}
+
+.f {
+    color: #7ec7ff
+}
+
+.t {
+    color: #ff9fc0
+}
+
+/* Code tabs. */
+.tabs {
+    margin: 14px 0
+}
+
+.tabbar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: -6px;
+    position: relative;
+    z-index: 1
+}
+
+.tabbar button {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 9px 9px 0 0;
+    font-size: 13px;
+    font-weight: 600
+}
+
+.tabbar button[aria-selected="true"] {
+    background: var(--code-bar);
+    color: #fff;
+    border-color: var(--code-bar)
+}
+
+.tabs figure.code {
+    margin-top: 0
+}
+
+/* Click-to-explain code lines. */
+.xl {
+    margin: 14px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--code-bg)
+}
+
+.xl button.xline {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    color: var(--code-ink);
+    font: 13.5px/1.65 var(--mono);
+    padding: 1px 16px;
+    white-space: pre;
+    overflow-x: auto
+}
+
+.xl button.xline:hover {
+    background: rgba(255, 255, 255, .07)
+}
+
+.xl button.xline.on {
+    background: color-mix(in srgb, var(--ac) 30%, transparent);
+    box-shadow: inset 3px 0 0 var(--ac)
+}
+
+.xl .xnote {
+    background: var(--code-bar);
+    color: #e6eeff;
+    padding: 12px 16px;
+    font-size: 14.5px;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    min-height: 52px
+}
+
+.xl .xnote b {
+    color: #ffd37a
+}

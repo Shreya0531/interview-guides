@@ -1,0 +1,120 @@
+<meta charset="utf-8">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>REST Assured Interview Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<!-- Styles, one file per concern. See README.md. -->
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/content.css">
+<link rel="stylesheet" href="css/code.css">
+<link rel="stylesheet" href="css/labs.css">
+<link rel="stylesheet" href="css/quiz.css">
+<link rel="stylesheet" href="css/extras.css">
+<link rel="stylesheet" href="css/responsive.css">
+<!-- Top bar, shown on phones only. -->
+<div class="topbar">
+    <button id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+    <b>REST Assured Interview Guide</b>
+    <span id="topProg">0%</span>
+</div>
+<div class="scrim" id="scrim"></div>
+<div class="app">
+    <!-- Sidebar: title, author, progress, search, menu (filled by js/layout.js) and theme buttons. -->
+    <aside class="side" id="side" aria-label="Sections">
+        <div class="brand"><b>REST Assured<br>Interview Guide</b><span>Java · API testing · from zero</span></div>
+        <div class="by">
+            <div class="avatar" aria-hidden="true">SG</div>
+            <div><small>Author</small><b>Shreya Gopal</b></div>
+        </div>
+        <div class="sprog">
+            <div><span>Your progress</span><span id="sideProg">0 of 0</span></div>
+            <div class="bar" style="display:block"><i id="sideBar"></i></div>
+        </div>
+        <input class="search" id="navSearch" type="search" placeholder="Find a topic…" aria-label="Find a topic">
+        <nav class="nav" id="nav"></nav>
+        <div class="theme" role="group" aria-label="Colour theme">
+            <button data-t="auto" aria-pressed="true">Auto</button>
+            <button data-t="light" aria-pressed="false">Light</button>
+            <button data-t="dark" aria-pressed="false">Dark</button>
+        </div>
+    </aside>
+    <main>
+        <div class="wrap">
+            <!-- Hero: title, author, stats and part cards. -->
+            <header class="hero">
+                <div class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="eyebrow">Interview study guide</div>
+                <h1>REST Assured <span>with Java</span></h1>
+                <p class="sub">Learn API testing from zero. Tiny examples, live demos and practice questions, all in
+                    simple English. Finish the guide and you are ready for the interview.</p>
+                <div class="hero-row">
+                    <div class="author">
+                        <div class="avatar" aria-hidden="true">SG</div>
+                        <div><small>Written by</small><b>Shreya Gopal</b></div>
+                    </div>
+                    <div class="stats" id="stats"></div>
+                </div>
+                <div class="hero-cta">
+                    <a class="btn" href="#http">Start from the beginning →</a>
+                    <a class="btn ghost" href="#qa">Go to interview questions</a>
+                    <a class="btn ghost" href="#mock">Take the mock interview</a>
+                </div>
+                <div class="howto">
+                    <div><b>1. Read in order</b>Each section builds on the one before it. Six colour-coded parts.</div>
+                    <div><b>2. Try the demos</b>Click, type and run. Seeing it work makes it stick.</div>
+                    <div><b>3. Answer the questions</b>Every section ends with practice. Mark it done when you score
+                        well.
+                    </div>
+                </div>
+                <div class="path" id="path"></div>
+            </header>
+            <!-- Lesson files are loaded here by js/main.js. -->
+            <div id="sections"
+                 data-src="content/part-1-basics.html,content/part-2-getting-started.html,content/part-3-core-skills.html,content/part-4-level-up.html,content/part-5-real-projects.html,content/part-6-interview-room.html"></div>
+            <!-- Footer with author credit. -->
+            <footer class="site">
+                <div class="author">
+                    <div class="avatar" aria-hidden="true">SG</div>
+                    <div><small>Author</small><b>Shreya Gopal</b></div>
+                </div>
+                <p>REST Assured with Java: Interview Study Guide. Written and designed by Shreya Gopal. The demo API in
+                    this page is pretend and runs inside your browser. Real tests call real URLs.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+<!-- Back-to-top button. -->
+<button class="totop" id="toTop" aria-label="Back to top" hidden>↑</button>
+<!-- Scripts share global functions, so the order matters: helpers, features, data, demos, then main.js. -->
+<script src="js/utils.js" defer></script>
+<script src="js/highlight.js" defer></script>
+<script src="js/layout.js" defer></script>
+<script src="js/quiz.js" defer></script>
+<script src="js/study.js" defer></script>
+<script src="data/quiz.js" defer></script>
+<script src="data/explain.js" defer></script>
+<script src="data/qa.js" defer></script>
+<script src="data/coding.js" defer></script>
+<script src="data/cheat.js" defer></script>
+<script src="data/errors.js" defer></script>
+<script src="js/labs/mock-api.js" defer></script>
+<script src="js/labs/gpath-engine.js" defer></script>
+<script src="js/labs/shared.js" defer></script>
+<script src="js/labs/url.js" defer></script>
+<script src="js/labs/status.js" defer></script>
+<script src="js/labs/jsonclick.js" defer></script>
+<script src="js/labs/puzzle.js" defer></script>
+<script src="js/labs/lab.js" defer></script>
+<script src="js/labs/matcher.js" defer></script>
+<script src="js/labs/gpath.js" defer></script>
+<script src="js/labs/chain.js" defer></script>
+<script src="js/labs/authlab.js" defer></script>
+<script src="js/labs/body.js" defer></script>
+<script src="js/labs/schema.js" defer></script>
+<script src="js/labs/checklist.js" defer></script>
+<script src="js/labs/mock.js" defer></script>
+<script src="js/labs/mount.js" defer></script>
+<script src="js/main.js" defer></script>
